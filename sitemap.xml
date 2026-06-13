@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://www.songpa-ganda.example.com/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/pungnap-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/samjeon-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/garak-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/munjeong-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/jangji-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/wirye-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/jamsil-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/songpa/sincheon-dong/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/magazine/</loc></url>
 </urlset>
