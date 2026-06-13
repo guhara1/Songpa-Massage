@@ -1,4 +1,25 @@
+# Google
+User-agent: Googlebot
+Allow: /
+Disallow: /support/privacy/
+Disallow: /support/terms/
+
+# Naver
+User-agent: Yeti
+Allow: /
+Disallow: /support/privacy/
+Disallow: /support/terms/
+
+# Bing / IndexNow
+User-agent: bingbot
+Allow: /
+Disallow: /support/privacy/
+Disallow: /support/terms/
+
 User-agent: *
 Allow: /
+Disallow: /support/privacy/
+Disallow: /support/terms/
 
-Sitemap: https://www.songpa-ganda.example.com/sitemap.xml
+Sitemap: https://songpa-massage.pages.dev/sitemap.xml
+Sitemap: https://songpa-massage.pages.dev/rss.xml
