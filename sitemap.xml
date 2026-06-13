@@ -44,6 +44,7 @@
   <url><loc>https://www.songpa-ganda.example.com/reservation/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/guide/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/reviews/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/support/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/magazine/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/magazine/visiting-vs-shop/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/magazine/60-90-120-course/</loc></url>
@@ -51,4 +52,5 @@
   <url><loc>https://www.songpa-ganda.example.com/magazine/stretching-with-massage/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/magazine/seasonal-fatigue/</loc></url>
   <url><loc>https://www.songpa-ganda.example.com/magazine/postpartum-care/</loc></url>
+  <url><loc>https://www.songpa-ganda.example.com/about/</loc></url>
 </urlset>
