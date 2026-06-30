@@ -2,7 +2,7 @@
 from .site import BASE_URL, BRAND, PHONE, PHONE_DISPLAY
 from .pricing import PRICING
 
-_JSONLD = f"""<meta name="naver-site-verification" content="f6703b4e7975aa4aa47300925d4a43b736d8a2f8">
+_JSONLD = f"""<meta name="naver-site-verification" content="270dc497577eacf01e6f57f10635900fcdfc334b">
 <script type="application/ld+json">
 {{
   "@context": "https://schema.org",

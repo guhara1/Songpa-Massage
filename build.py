@@ -8,6 +8,7 @@ content/ 패키지의 페이지 정의를 읽어 정적 HTML을 생성한다.
   - sitemap.xml 에는 index 허용 페이지만 포함
   - 지역+역+테마 조합 경로는 생성 자체가 불가능한 구조
 """
+import datetime
 import html
 import os
 import re
@@ -24,8 +25,10 @@ MIN_INDEX_CHARS = 2000
 
 def text_length(body_html: str) -> int:
     """태그를 제거한 본문 글자수(공백 포함, 연속 공백은 1자).
-    공통 요금 블록은 페이지 고유 본문이 아니므로 측정에서 제외한다."""
+    공통 요금 블록·관련 안내(내부링크) 블록은 페이지 고유 본문이 아니므로
+    측정에서 제외한다."""
     text = re.sub(r'<section class="pricing">.*?</section>', " ", body_html, flags=re.S)
+    text = re.sub(r'<aside class="related">.*?</aside>', " ", text, flags=re.S)
     text = re.sub(r"<[^>]+>", " ", text)
     text = html.unescape(text)
     text = re.sub(r"\s+", " ", text).strip()
@@ -106,6 +109,151 @@ def render_toc(items) -> str:
     )
 
 
+_WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+
+def _rfc822(date_str: str) -> str:
+    """'YYYY-MM-DD' → RSS pubDate(RFC-822, KST). 변환 실패 시 원문 유지."""
+    try:
+        d = datetime.date.fromisoformat(date_str)
+    except (ValueError, TypeError):
+        return date_str
+    return f"{_WD[d.weekday()]}, {d.day:02d} {_MON[d.month - 1]} {d.year} 00:00:00 +0900"
+
+
+def _json_escape(s: str) -> str:
+    """JSON 문자열 값 안전 처리(따옴표·역슬래시·개행)."""
+    s = s.replace("\\", "\\\\").replace('"', '\\"')
+    s = s.replace("\n", " ").replace("\r", " ")
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _strip_tags(s: str) -> str:
+    s = re.sub(r"<[^>]+>", "", s)
+    s = html.unescape(s)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+# 롱테일 정보성 글(매거진) — 메인부터 모든 콘텐츠 페이지의 관련 안내 내부링크로 노출.
+_RELATED_TOPICS = [
+    ("/magazine/visiting-vs-shop/", "출장마사지와 샵 방문, 무엇이 다를까"),
+    ("/magazine/60-90-120-course/", "60·90·120분 코스 시간 고르는 기준"),
+    ("/magazine/desk-worker-back/", "좌식 근무로 굳은 허리 풀기"),
+    ("/magazine/stretching-with-massage/", "마사지 전후 스트레칭 활용법"),
+    ("/magazine/seasonal-fatigue/", "환절기 컨디션이 무너질 때"),
+    ("/magazine/postpartum-care/", "출산 후 회복기 관리 주의사항"),
+]
+_RELATED_GUIDES = [
+    ("/courses/", "코스안내"),
+    ("/themes/", "테마별 안내"),
+    ("/reservation/", "예약안내"),
+    ("/guide/", "이용가이드"),
+    ("/reviews/", "이용 후기"),
+]
+
+
+def render_related(path: str) -> str:
+    """관련 안내(롱테일 주제) 내부링크 블록.
+    본문 글자수 측정에서는 제외되며(내비게이션 성격), 자기 자신으로의 링크는 건너뛴다.
+    약관·개인정보 등 noindex 법적 문서에는 노출하지 않는다."""
+    self_href = "/" + path if path else "/"
+    if self_href.startswith("/support/privacy") or self_href.startswith("/support/terms"):
+        return ""
+    topics = [(h, t) for h, t in _RELATED_TOPICS if h != self_href]
+    guides = [(h, t) for h, t in _RELATED_GUIDES if h != self_href]
+    topic_li = "".join(
+        f'<li><a href="{h}">{t}</a></li>' for h, t in topics
+    )
+    guide_li = "".join(
+        f'<li><a href="{h}">{t}</a></li>' for h, t in guides
+    )
+    return (
+        '<aside class="related" aria-label="관련 안내">'
+        '<p class="related-title">함께 보면 좋은 주제</p>'
+        '<div class="related-cols">'
+        '<div class="related-group"><p class="related-sub">읽을거리</p>'
+        f'<ul class="related-list">{topic_li}</ul></div>'
+        '<div class="related-group"><p class="related-sub">바로가기</p>'
+        f'<ul class="related-list links">{guide_li}</ul></div>'
+        '</div></aside>'
+    )
+
+
+def render_breadcrumb_jsonld(canonical: str, crumbs) -> str:
+    items = [{"name": "홈", "url": BASE_URL.rstrip("/") + "/"}]
+    for label, href in crumbs:
+        url = (BASE_URL.rstrip("/") + href) if href else canonical
+        items.append({"name": _strip_tags(label), "url": url})
+    # 마지막 항목이 곧 현재 페이지가 아니면(허브 직속 등) 현재 페이지를 끝에 보강
+    if items[-1]["url"] != canonical:
+        pass
+    li = ",".join(
+        '{{"@type":"ListItem","position":{0},"name":"{1}","item":"{2}"}}'.format(
+            i + 1, _json_escape(it["name"]), it["url"]
+        )
+        for i, it in enumerate(items)
+    )
+    return (
+        '<script type="application/ld+json">'
+        '{"@context":"https://schema.org","@type":"BreadcrumbList",'
+        f'"itemListElement":[{li}]}}'
+        "</script>\n"
+    )
+
+
+def render_faq_jsonld(body: str) -> str:
+    """본문의 .faq-item(Q=h3, A=p)에서 FAQPage 스키마를 자동 생성한다."""
+    pairs = re.findall(
+        r'<div class="faq-item">\s*<h3>(.*?)</h3>\s*<p>(.*?)</p>',
+        body, flags=re.S,
+    )
+    if not pairs:
+        return ""
+    entities = []
+    for q, a in pairs:
+        entities.append(
+            '{{"@type":"Question","name":"{0}",'
+            '"acceptedAnswer":{{"@type":"Answer","text":"{1}"}}}}'.format(
+                _json_escape(_strip_tags(q)), _json_escape(_strip_tags(a))
+            )
+        )
+    return (
+        '<script type="application/ld+json">'
+        '{"@context":"https://schema.org","@type":"FAQPage","mainEntity":['
+        + ",".join(entities) + "]}</script>\n"
+    )
+
+
+def render_website_jsonld() -> str:
+    base = BASE_URL.rstrip("/")
+    return (
+        '<script type="application/ld+json">'
+        '{"@context":"https://schema.org","@type":"WebSite",'
+        f'"name":"{_json_escape(BRAND)}","url":"{base}/","inLanguage":"ko",'
+        '"publisher":{"@type":"Organization",'
+        f'"name":"{_json_escape(BRAND)}","url":"{base}/",'
+        f'"logo":{{"@type":"ImageObject","url":"{base}/assets/icon-512.png"}}}}}}'
+        "</script>\n"
+    )
+
+
+def auto_jsonld(page: dict, canonical: str) -> str:
+    """모든 페이지에 공통 적용되는 구조화 데이터.
+      - WebSite(+publisher Organization)
+      - BreadcrumbList
+      - FAQPage (본문에 FAQ가 있고, extra_head 에 이미 FAQPage 가 없을 때만)
+    """
+    out = [render_website_jsonld()]
+    crumbs = page.get("breadcrumb") or []
+    if crumbs:
+        out.append(render_breadcrumb_jsonld(canonical, crumbs))
+    if "FAQPage" not in page.get("extra_head", ""):
+        out.append(render_faq_jsonld(page["body"]))
+    return "".join(out)
+
+
 def render_page(page: dict) -> str:
     path = page["path"]
     title = page["title"]
@@ -137,6 +285,9 @@ def render_page(page: dict) -> str:
     toc_html = render_toc(toc_items)
     layout_cls = "page-layout has-toc" if toc_html else "page-layout"
 
+    auto_ld = auto_jsonld(page, canonical)
+    related_html = render_related(path)
+
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -165,7 +316,7 @@ def render_page(page: dict) -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/style.css">
-{extra_head}</head>
+{extra_head}{auto_ld}</head>
 <body>
 <header class="site-header">
   <div class="header-accent" aria-hidden="true"></div>
@@ -188,6 +339,7 @@ def render_page(page: dict) -> str:
       {render_breadcrumb(crumbs)}
       {h1_html}
       {body}
+      {related_html}
     </article>
   </div>
 </main>
@@ -323,7 +475,7 @@ def build() -> None:
             f"      <link>{url}</link>\n"
             f"      <guid isPermaLink=\"true\">{url}</guid>\n"
             f"      <description><![CDATA[{desc}]]></description>\n"
-            f"      <pubDate>{date}</pubDate>\n"
+            f"      <pubDate>{_rfc822(date)}</pubDate>\n"
             f"    </item>"
         )
     rss_body = "\n".join(rss_items)
@@ -336,7 +488,7 @@ def build() -> None:
             f'    <link>{BASE_URL}/</link>\n'
             f'    <description>송파구 방문 관리 안내 정보 글 모음</description>\n'
             f'    <language>ko</language>\n'
-            f'    <lastBuildDate>{today}</lastBuildDate>\n'
+            f'    <lastBuildDate>{_rfc822(today)}</lastBuildDate>\n'
             f'    <atom:link href="{BASE_URL}/rss.xml" rel="self" type="application/rss+xml"/>\n'
             f'{rss_body}\n'
             '  </channel>\n</rss>\n'
@@ -351,6 +503,11 @@ def build() -> None:
         "Disallow: /support/terms/\n\n"
         "# Naver\n"
         "User-agent: Yeti\n"
+        "Allow: /\n"
+        "Disallow: /support/privacy/\n"
+        "Disallow: /support/terms/\n\n"
+        "# Daum\n"
+        "User-agent: Daumoa\n"
         "Allow: /\n"
         "Disallow: /support/privacy/\n"
         "Disallow: /support/terms/\n\n"

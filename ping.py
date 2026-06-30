@@ -27,7 +27,7 @@ import urllib.parse
 import urllib.error
 
 # ─── 설정 ─────────────────────────────────────────────────────────────────────
-BASE_URL = "https://songpa-massage.pages.dev"
+BASE_URL = "https://songpa-massage.netlify.app"
 INDEXNOW_KEY = "38dd0fc8c6bb488e95fb1fb03bf805a6"
 SITEMAP_URL = f"{BASE_URL}/sitemap.xml"
 
