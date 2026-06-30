@@ -686,3 +686,82 @@ th { background: var(--panel-2); color: var(--gold-soft); font-family: var(--ser
   .sub-menu { max-height: none; overflow: visible; }
   .sub-label { padding: 12px 38px 4px; }
 }
+
+/* ── 관련 안내(롱테일 내부링크) ─────────── */
+.related {
+  margin-top: 34px; padding: 28px 30px;
+  background: linear-gradient(180deg, var(--panel-2), #0b1322);
+  border: 1px solid var(--line-gold); border-radius: 16px;
+}
+.related-title {
+  font-family: var(--serif); color: var(--gold-soft); font-weight: 700;
+  font-size: 1.12rem; letter-spacing: 0.04em; margin: 0 0 18px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--line);
+}
+.related-cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; }
+.related-sub {
+  font-size: 0.76rem; letter-spacing: 0.2em; color: var(--gold);
+  margin: 0 0 10px;
+}
+.related-list { list-style: none; margin: 0; }
+.related-list li { margin: 0 0 9px; }
+.related-list a {
+  color: var(--text); font-size: 0.93rem;
+  border-bottom: 1px solid transparent; transition: 0.15s;
+}
+.related-list a:hover { color: var(--gold-soft); border-bottom-color: var(--line-gold); }
+.related-list.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.related-list.links li { margin: 0; }
+.related-list.links a {
+  padding: 6px 14px; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); font-size: 0.88rem;
+}
+.related-list.links a:hover { border-color: var(--gold); }
+@media (max-width: 720px) { .related-cols { grid-template-columns: 1fr; gap: 22px; } }
+
+/* ── 후기 별점 / 평점 ──────────────────── */
+.rv-stars {
+  position: relative; display: inline-block; white-space: nowrap;
+  font-size: 1rem; line-height: 1; letter-spacing: 2px;
+}
+.rv-stars .rv-bg { color: #2c3650; }
+.rv-stars .rv-fg {
+  position: absolute; left: 0; top: 0; overflow: hidden;
+  color: var(--gold); white-space: nowrap;
+}
+.rv-stars.big { font-size: 1.4rem; letter-spacing: 3px; }
+
+.rating-summary {
+  display: flex; align-items: center; gap: 22px;
+  background:
+    radial-gradient(ellipse 70% 120% at 12% -20%, rgba(200, 162, 94, 0.14), transparent 60%),
+    linear-gradient(180deg, #101a30, #0b1322);
+  border: 1px solid var(--line-gold); border-radius: 16px;
+  padding: 22px 26px; margin: 0 0 22px;
+}
+.rating-num {
+  font-family: var(--serif); font-size: 2.6rem; font-weight: 800;
+  color: var(--gold-soft); line-height: 1;
+}
+.rating-num span { font-size: 1rem; color: var(--text-dim); font-weight: 600; margin-left: 2px; }
+.rating-meta { display: flex; flex-direction: column; gap: 9px; }
+.rating-count { font-size: 0.85rem; color: var(--text-dim); letter-spacing: 0.04em; }
+
+.review-list { display: grid; gap: 14px; margin: 18px 0 8px; }
+.review-card {
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 14px; padding: 18px 22px; transition: 0.18s;
+}
+.review-card:hover { border-color: var(--line-gold); transform: translateY(-2px); }
+.review-head {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+}
+.review-who { font-weight: 700; color: var(--gold-soft); font-size: 0.95rem; }
+.review-rating { display: inline-flex; align-items: center; gap: 8px; }
+.review-score { color: var(--gold); font-family: var(--serif); font-weight: 700; font-size: 0.95rem; }
+.review-text { margin: 0; color: var(--text-dim); line-height: 1.85; }
+@media (max-width: 720px) {
+  .rating-summary { gap: 16px; padding: 18px; }
+  .rating-num { font-size: 2.1rem; }
+}

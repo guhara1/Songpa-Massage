@@ -10,6 +10,12 @@ Allow: /
 Disallow: /support/privacy/
 Disallow: /support/terms/
 
+# Daum
+User-agent: Daumoa
+Allow: /
+Disallow: /support/privacy/
+Disallow: /support/terms/
+
 # Bing / IndexNow
 User-agent: bingbot
 Allow: /
@@ -21,5 +27,5 @@ Allow: /
 Disallow: /support/privacy/
 Disallow: /support/terms/
 
-Sitemap: https://songpa-massage.pages.dev/sitemap.xml
-Sitemap: https://songpa-massage.pages.dev/rss.xml
+Sitemap: https://songpa-massage.netlify.app/sitemap.xml
+Sitemap: https://songpa-massage.netlify.app/rss.xml
